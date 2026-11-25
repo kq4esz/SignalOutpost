@@ -1,0 +1,10 @@
+{
+  "community": "",
+  "version": "Signal Outpost CPS offline",
+  "repo": "",
+  "reports": {
+    "sentry_dsn": ""
+  },
+  "format": "signal-outpost-cps-offline/1",
+  "git": "local"
+}

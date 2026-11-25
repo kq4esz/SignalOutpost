@@ -1,0 +1,2 @@
+31e425600b5e8de7db568b497158dddc782f5a4454536417627b2436421365cf  rfoundry-dm32-dm32-sstv-aprs-hotspot-sfr-v26.11.25-ysf-k4gv-repeater.bin
+d5f3738c3609509cff9e7f1a28210fa143bfa7a0f160173ef1c0506221c77240  rfoundry-dm32-dm32-sstv-aprs-hotspot-sfr-v26.11.25-ysf-k4gv-repeater.json

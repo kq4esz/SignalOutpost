@@ -1,0 +1,20 @@
+{
+  "radios": [
+    {
+      "model": "DM-32UV",
+      "id": "dm32",
+      "maker": "Baofeng",
+      "codeplug": {
+        "base": 7340032,
+        "end": 15728640,
+        "tftp": false,
+        "names": [
+          "DM-32UV",
+          "DM-32",
+          "dm32"
+        ]
+      },
+      "name": "Baofeng DM-32UV"
+    }
+  ]
+}

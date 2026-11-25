@@ -1,0 +1,76 @@
+name: Build and publish release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  windows-release:
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify firmware manifest and checksums
+        run: node tools/verify-firmware.cjs
+
+      - name: Confirm release tag matches package version
+        shell: pwsh
+        run: |
+          $version = node -p "require('./package.json').version"
+          if ($env:GITHUB_REF_NAME -ne "v$version") {
+            throw "Tag $env:GITHUB_REF_NAME does not match package.json version v$version"
+          }
+
+      - name: Build Windows installer and updater feed
+        run: pnpm run release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add firmware, manifest, checksums, and notes
+        shell: pwsh
+        run: |
+          node tools/release-notes.cjs $env:GITHUB_REF_NAME
+          $firmware = Get-ChildItem 'assets/firmware/current' -File
+          $releaseFiles = Get-ChildItem 'release' -File
+          if (-not ($releaseFiles | Where-Object Name -Like '*.exe')) { throw 'Windows installer was not produced.' }
+          if (-not ($releaseFiles | Where-Object Name -eq 'latest.yml')) { throw 'electron-updater latest.yml was not produced.' }
+          "Firmware files: $($firmware.Count); desktop release assets: $($releaseFiles.Count)"
+
+      - name: Publish firmware and release notes
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Signal Outpost CPS ${{ github.ref_name }}
+          body_path: release-notes.md
+          draft: false
+          prerelease: false
+          files: |
+            assets/firmware/current/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Save release installer artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Signal-Outpost-CPS-${{ github.ref_name }}-Windows
+          path: release/*
+          if-no-files-found: error
