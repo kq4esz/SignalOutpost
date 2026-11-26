@@ -49,6 +49,20 @@ function releaseFiles() {
 	return files;
 }
 
+function releaseAssetLabel(file) {
+	if (!file.toLowerCase().endsWith('.bin')) return '';
+	const directory = path.dirname(file);
+	for (const name of fs.readdirSync(directory).filter((entry) => entry.toLowerCase().endsWith('.json'))) {
+		try {
+			const manifest = JSON.parse(fs.readFileSync(path.join(directory, name), 'utf8'));
+			if (manifest.format === 'rfoundry-release/1' && manifest.image?.file === path.basename(file)) {
+				return manifest.display_name || `Signal Outpost ${manifest.board_name || manifest.board} ${manifest.version || ''}`.trim();
+			}
+		} catch { /* not a release manifest */ }
+	}
+	return '';
+}
+
 async function main() {
 	const body = fs.readFileSync('release-notes.md', 'utf8');
 	const metadata = { name: `Signal Outpost CPS ${tag}`, body, draft: false, prerelease: false };
@@ -71,7 +85,8 @@ async function main() {
 		const name = path.basename(file);
 		const old = byName.get(name);
 		if (old) await request('DELETE', `${apiRoot}/releases/assets/${old.id}`);
-		const uploadUrl = `https://uploads.github.com/repos/${owner}/${repo}/releases/${release.id}/assets?name=${encodeURIComponent(name)}`;
+		const label = releaseAssetLabel(file);
+		const uploadUrl = `https://uploads.github.com/repos/${owner}/${repo}/releases/${release.id}/assets?name=${encodeURIComponent(name)}${label ? `&label=${encodeURIComponent(label)}` : ''}`;
 		const payload = fs.readFileSync(file);
 		const asset = await request('POST', uploadUrl, payload, { 'Content-Type': 'application/octet-stream' });
 		console.log(`Uploaded ${asset.name} (${asset.size} bytes).`);

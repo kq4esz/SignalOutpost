@@ -9,6 +9,8 @@ const subscribe = (channel, callback) => {
 
 contextBridge.exposeInMainWorld('signalOutpostNative', Object.freeze({
   listSerialPorts: () => ipcRenderer.invoke('signal-outpost:serial-list'),
+  listFirmwareReleases: () => ipcRenderer.invoke('signal-outpost:firmware-list'),
+  downloadFirmwareAsset: (assetId) => ipcRenderer.invoke('signal-outpost:firmware-download', assetId),
   openSerialPort: (path, baudRate) => ipcRenderer.invoke('signal-outpost:serial-open', path, baudRate),
   writeSerialPort: (path, data) => ipcRenderer.invoke('signal-outpost:serial-write', path, data),
   closeSerialPort: (path) => ipcRenderer.invoke('signal-outpost:serial-close', path),

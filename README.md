@@ -11,21 +11,23 @@ same release includes the current DM-32UV firmware image, manifest, checksum, an
 
 ## Install and use
 
-1. Run `Signal-Outpost-CPS-1.0.7-x64-Setup.exe` and complete the installer.
+1. Run `Signal-Outpost-CPS-1.0.8-x64-Setup.exe` and complete the installer.
 2. Open **Signal Outpost CPS** from the Start menu or desktop.
 3. Connect the DM-32UV programming cable and use **Choose COM port** in the CPS header to select it from Windows' installed COM port list.
-4. Use **Read from Radio** or **Write to Radio** for codeplug programming, or open **Firmware** to select and flash a local image.
+4. Use **Read from Radio** or **Write to Radio** for codeplug programming, or open **Firmware** to select a GitHub firmware release or local image.
 
-The CPS runs offline. It keeps the codeplug in this computer's app storage and communicates with the radio only when
-you choose a read or write operation. The app checks GitHub Releases for CPS updates and asks before restarting to
-install one. Firmware flashing is a separate user-started operation in the **Firmware** section; the selected image is
-checked locally and is not fetched from a build service.
+Codeplug editing and radio programming work offline; codeplug data stays in this computer's app storage and is sent to
+the radio only when you choose a read or write operation. Internet access is needed to check CPS updates or list and
+download published firmware. Firmware flashing is a separate user-started operation in the **Firmware** section; the
+selected image is checked locally and is never fetched from a build service.
 
 ## Firmware distribution
 
-The current test firmware is kept in `assets/firmware/current/` with its release manifest and SHA-256 file. Versioned
-GitHub releases attach these files alongside the Windows installer. Check the manifest, board name, checksum, and
-flashing route before using an image. The current image is for the DM-32UV and requires the RadioFoundry stub route.
+The current test firmware is kept in `assets/firmware/current/` with its release manifest and SHA-256 file. Firmware
+files attached to public GitHub releases appear in the Firmware version list, grouped by unique image. The current
+image is named **Signal Outpost Blue — DM-32UV — v26.11.25** and requires the RadioFoundry stub route. Local `.bin`
+files with a matching `.json` manifest remain supported. New firmware packages use the name format
+`signal-outpost-dm32uv-v<radio-version>-<variant>.bin`; the matching manifest sets `display_name` for the CPS picker.
 
 ## Publish a version
 

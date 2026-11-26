@@ -37,6 +37,9 @@ let localServer;
 let downloadedUpdate = false;
 let updateCheckPending = false;
 const nativeSerialPorts = new Map();
+const firmwareReleaseAssets = new Map();
+const FIRMWARE_RELEASES_API = 'https://api.github.com/repos/kq4esz/SignalOutpost/releases?per_page=100';
+const FIRMWARE_RELEASE_BASE = 'https://github.com/kq4esz/SignalOutpost/releases/download/';
 
 app.setAppUserModelId(APP_ID);
 
@@ -285,6 +288,74 @@ function setupNativeSerialAccess() {
     if (!active) return;
     await new Promise((resolve, reject) => active.close((error) => error ? reject(error) : resolve()));
     nativeSerialPorts.delete(key);
+  });
+
+  ipcMain.handle('signal-outpost:firmware-list', async (event) => {
+    if (!trusted(event)) throw new Error('Firmware release access is limited to Signal Outpost CPS.');
+    const response = await fetch(FIRMWARE_RELEASES_API, {
+      headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'Signal-Outpost-CPS' },
+    });
+    if (!response.ok) throw new Error(`GitHub returned HTTP ${response.status} while listing firmware releases.`);
+    const releases = await response.json();
+    if (!Array.isArray(releases)) throw new Error('GitHub returned an unexpected firmware release list.');
+
+    firmwareReleaseAssets.clear();
+    const catalog = [];
+    const seenImages = new Set();
+    for (const release of releases) {
+      if (release.draft || !Array.isArray(release.assets)) continue;
+      for (const image of release.assets.filter((asset) => /\.bin$/i.test(asset.name) && /dm32/i.test(asset.name))) {
+        const manifest = release.assets.find((asset) => asset.name.toLowerCase() === image.name.replace(/\.bin$/i, '.json').toLowerCase());
+        if (!manifest || image.state !== 'uploaded' || manifest.state !== 'uploaded') continue;
+        const identity = image.digest || image.name;
+        if (seenImages.has(identity)) continue;
+        seenImages.add(identity);
+
+        const assetVersion = /(?:^|[-_])v(\d{2}\.\d{1,2}(?:\.\d+)?)(?:[-_]([^/]+))?\.bin$/i.exec(image.name);
+        let name = image.label?.trim() || '';
+        if (!name && assetVersion) {
+          const variant = (assetVersion[2] || '').replace(/^signal[-_]outpost[-_]?/i, '').replace(/[-_]/g, ' ')
+            .replace(/\b\w/g, (letter) => letter.toUpperCase()).trim();
+          name = `Signal Outpost${variant ? ` ${variant}` : ''} · DM-32UV · v${assetVersion[1]}`;
+        }
+        if (!name) name = `DM-32UV firmware · ${image.name}`;
+
+        for (const asset of [image, manifest]) {
+          let url;
+          try { url = new URL(asset.browser_download_url); } catch { continue; }
+          if (url.origin !== 'https://github.com' || !url.pathname.startsWith('/kq4esz/SignalOutpost/releases/download/')) continue;
+          firmwareReleaseAssets.set(Number(asset.id), { name: asset.name, url: asset.browser_download_url, size: Number(asset.size) || 0 });
+        }
+        if (!firmwareReleaseAssets.has(Number(image.id)) || !firmwareReleaseAssets.has(Number(manifest.id))) continue;
+        catalog.push({
+          id: `${release.id}:${image.id}`,
+          name,
+          imageAssetId: Number(image.id),
+          manifestAssetId: Number(manifest.id),
+          imageName: image.name,
+          manifestName: manifest.name,
+          size: Number(image.size) || 0,
+          sha256: typeof image.digest === 'string' ? image.digest.replace(/^sha256:/i, '') : '',
+          releaseTag: String(release.tag_name || ''),
+          publishedAt: String(release.published_at || ''),
+        });
+      }
+    }
+    return catalog;
+  });
+
+  ipcMain.handle('signal-outpost:firmware-download', async (event, assetId) => {
+    if (!trusted(event)) throw new Error('Firmware downloads are limited to Signal Outpost CPS.');
+    const id = Number(assetId);
+    const asset = Number.isSafeInteger(id) ? firmwareReleaseAssets.get(id) : null;
+    if (!asset) throw new Error('This firmware asset is not in the current release list. Refresh the list and choose it again.');
+    if (!asset.url.startsWith(FIRMWARE_RELEASE_BASE)) throw new Error('GitHub returned an unexpected firmware download address.');
+    if (asset.size > 8 * 1024 * 1024) throw new Error('The selected firmware release asset is larger than the CPS permits.');
+    const response = await fetch(asset.url, { headers: { 'User-Agent': 'Signal-Outpost-CPS' } });
+    if (!response.ok) throw new Error(`GitHub returned HTTP ${response.status} while downloading ${asset.name}.`);
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    if (bytes.length !== asset.size) throw new Error(`${asset.name} downloaded with the wrong size; refresh the release list and try again.`);
+    return { name: asset.name, data: bytes };
   });
 }
 

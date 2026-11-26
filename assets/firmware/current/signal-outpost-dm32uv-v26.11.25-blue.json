@@ -3,10 +3,11 @@
   "board": "dm32",
   "board_name": "Baofeng DM-32UV",
   "version": "v26.11.25-signal-outpost-blue",
+  "display_name": "Signal Outpost Blue — DM-32UV — v26.11.25 (Build b4c6d8b1)",
   "git": "b4c6d8b1",
   "git_full": "b4c6d8b10aee304593e2d830452d27410d718730",
   "image": {
-    "file": "rfoundry-dm32-dm32-sstv-aprs-hotspot-sfr-v26.11.25-signal-outpost-blue.bin",
+    "file": "signal-outpost-dm32uv-v26.11.25-blue.bin",
     "size": 707524,
     "sha256": "0519b336b43db7b64690febae06392910083f8c78fc7aad78961f26ae37a481d"
   },

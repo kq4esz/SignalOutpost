@@ -1,5 +1,17 @@
 # Release notes
 
+## v1.0.8 — Named firmware releases and clearer flash steps
+
+### Added
+
+- Added a GitHub Releases firmware selector to the desktop installer. It lists unique DM-32UV images, downloads the selected image and matching manifest, and verifies the image before flashing.
+- Kept local `.bin` images and optional `.json` manifests available.
+
+### Changed
+
+- Replaced raw flash-step translation keys with readable step names.
+- Renamed the current firmware asset to `signal-outpost-dm32uv-v26.11.25-blue.bin` and added its display name to the manifest and GitHub release asset label.
+
 ## v1.0.7 — Clean up CPS header and intro
 
 ### Changed

@@ -27,6 +27,9 @@
 .serial-port-dialog-actions button { border:1px solid var(--border); border-radius:var(--radius-sm); padding:.45rem .7rem; background:var(--surface); color:var(--text); font:600 .8rem var(--font-sans); cursor:pointer; }
 .serial-port-dialog-actions button:hover { border-color:var(--brand-accent); color:var(--brand-accent); }
 .serial-port-dialog-actions button.primary { border-color:var(--brand-accent); background:var(--brand-accent); color:var(--bg); }
+.firmware-release-controls { display:flex; align-items:center; flex-wrap:wrap; gap:.55rem; margin:.75rem 0; }
+.firmware-release-select { flex:1 1 22rem; min-width:14rem; border:1px solid var(--border); border-radius:var(--radius-sm); padding:.55rem .7rem; background:var(--bg); color:var(--text); font:500 .9rem var(--font-sans); }
+.firmware-release-select:disabled { opacity:.7; }
 .offline-page-head { padding-top:2rem; padding-bottom:1rem; }
 .offline-page-head h1 { margin-bottom:.45rem; }
 .offline-tool-section { padding-top:.5rem; }

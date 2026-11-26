@@ -119,6 +119,8 @@ function languageName(code) {
 const initialState = () => ({
 	task: null, step: 0, data: null, radio: null, board: null, selection: null, sim: null, fakeRadio: null,
 	firmware: null,		// {manifest, image, source}
+	ownManifest: null,
+	localImageFile: null,
 	now: null,		// what runs on the radio: {kind: "rfoundry", probe} | {kind: "stock", version} | {kind: "unknown"}, with
 			// openfw: true when the user chose "Another open firmware" (explain.js nowFor), plus radioType and git
 			// once a probe recognized it (openfwRecognized): then the step backs it up (openfw.js)
@@ -154,6 +156,19 @@ const API = "https://api.radiofoundry.org/v1/";
 const FLASH_LOG = new URLSearchParams(location.search).get("reporting") !== "0";
 // The desktop CPS exposes a fully local path: no build-service request, and no flash telemetry.
 const LOCAL_FLASH = new URLSearchParams(location.search).has("local");
+
+const STEP_TITLES = Object.freeze({
+	radio: "Select Radio", build: "Choose Firmware", connect: "Connect to Radio", check: "Verify Radio", write: "Install Firmware",
+	c7_done: "Finish", done: "Finish", update: "Select Update", now: "Check Current Firmware", codec: "Choose Codec",
+	backup: "Back Up Radio", bundle: "Choose Backup", symptom: "Describe Problem", recover: "Recovery Steps", restart: "Restart Radio",
+});
+
+function stepTitle(key) {
+	const translationKey = `flash.step.${key}`;
+	const translated = t(translationKey);
+	if (translated !== translationKey) return translated;
+	return STEP_TITLES[key] || String(key).replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 // A version link (/flash/?version=<tag, full commit hash or branch name>) builds that version instead of the latest release. The tab keeps
 // it for the session, so a reload or a visit to another page doesn't lose it; ?version= (empty) or the banner drops it.
@@ -804,7 +819,7 @@ function render() {
 	const steps = stepsFor();
 	const label = (s) => (S.radio && backend().stepLabel?.(s, S.task)) || s;
 	const stepper = () => h("ol", { class: "stepper" }, stepsFor().map((s, i) =>
-		h("li", { class: i < S.step ? "done" : "", "aria-current": i === S.step ? "step" : false }, t(`flash.step.${label(s)}`))));
+		h("li", { class: i < S.step ? "done" : "", "aria-current": i === S.step ? "step" : false }, stepTitle(label(s)))));
 	let shown = stepper();
 	app.append(shown);
 	render.stepper = () => { const n = stepper(); shown.replaceWith(n); shown = n; };
@@ -1181,33 +1196,138 @@ function buildView() {
 	const sel = S.selection;
 	const wrap = h("div", { class: "flasher" });
 	if (LOCAL_FLASH) {
+		let releaseList = [];
+		let releaseListLoading = false;
+		let releaseListError = "";
+		let releaseStatus = "";
+		let releaseId = "";
+		let releaseDownloadBusy = false;
+		let localManifestPicked = false;
+		let refreshStarted = false;
+
+		async function refreshReleases() {
+			if (releaseListLoading || releaseDownloadBusy) return;
+			releaseListLoading = true;
+			releaseListError = "";
+			releaseStatus = "Checking GitHub for published DM-32UV firmware…";
+			drawLocal();
+			try {
+				if (!window.signalOutpostNative?.listFirmwareReleases) {
+					throw new Error("GitHub firmware downloads are available in the installed Signal Outpost CPS. Local firmware files still work here.");
+				}
+				releaseList = await window.signalOutpostNative.listFirmwareReleases();
+				if (!releaseList.some((entry) => entry.id === releaseId)) releaseId = "";
+				releaseStatus = releaseList.length
+					? `${releaseList.length} unique DM-32UV firmware version${releaseList.length === 1 ? "" : "s"} found. Downloads are verified against the release manifest.`
+					: "No published DM-32UV firmware versions were found on GitHub.";
+			} catch (error) {
+				releaseListError = error?.message || String(error);
+				releaseStatus = "";
+			} finally {
+				releaseListLoading = false;
+				drawLocal();
+			}
+		}
+
+		async function downloadRelease() {
+			const selected = releaseList.find((entry) => entry.id === releaseId);
+			if (!selected || releaseDownloadBusy) return;
+			releaseDownloadBusy = true;
+			releaseListError = "";
+			releaseStatus = `Downloading ${selected.name}…`;
+			S.firmware = null;
+			S.ownManifest = null;
+			S.localImageFile = null;
+			localManifestPicked = false;
+			drawLocal();
+			try {
+				const [manifestFile, imageFile] = await Promise.all([
+					window.signalOutpostNative.downloadFirmwareAsset(selected.manifestAssetId),
+					window.signalOutpostNative.downloadFirmwareAsset(selected.imageAssetId),
+				]);
+				const manifest = JSON.parse(new TextDecoder().decode(manifestFile.data));
+				if (manifest.board !== S.board.id) throw new Error("The selected release manifest is for another radio board.");
+				if (manifest.image?.file !== imageFile.name) throw new Error("The selected image and manifest do not belong together.");
+				S.ownManifest = manifest;
+				S.localImageFile = { name: imageFile.name, data: new Uint8Array(imageFile.data) };
+				await loadOwnImage(S.localImageFile, drawLocal);
+				if (!S.firmware) throw new Error("The selected firmware did not pass local manifest verification.");
+				S.firmware.source = manifest.display_name || selected.name;
+				S.firmware.origin = `github-release:${selected.releaseTag}`;
+				releaseStatus = `${selected.name} downloaded and verified.`;
+			} catch (error) {
+				S.firmware = null;
+				S.ownManifest = null;
+				S.localImageFile = null;
+				releaseListError = error?.message || String(error);
+				releaseStatus = "";
+			} finally {
+				releaseDownloadBusy = false;
+				drawLocal();
+			}
+		}
+
 		const drawLocal = () => {
 			const status = S.firmware
 				? notice(`${S.firmware.source} · ${S.firmware.image.length.toLocaleString()} bytes · ${S.firmware.manifest.dev_build ? "local SHA-256 calculated" : "manifest SHA-256 verified"}`, "ok")
 				: notice("Choose a DM-32UV firmware .bin file from this computer. The selected file is checked locally before the radio is changed.", "info");
+			const releaseOptions = [
+				h("option", { value: "", selected: !releaseId }, "Choose a published firmware version…"),
+				...releaseList.map((entry) => h("option", { value: entry.id, selected: entry.id === releaseId }, `${entry.name} · ${entry.size.toLocaleString()} bytes`)),
+			];
+			const releasePicker = h("select", { class: "firmware-release-select", "aria-label": "Published DM-32UV firmware versions",
+				disabled: !releaseList.length || releaseListLoading || releaseDownloadBusy,
+				onchange: (event) => {
+					releaseId = event.target.value;
+					releaseStatus = "";
+					releaseListError = "";
+					if (S.firmware?.origin?.startsWith("github-release:")) {
+						S.firmware = null;
+						S.ownManifest = null;
+						S.localImageFile = null;
+					}
+					drawLocal();
+				} }, ...releaseOptions);
+			const releaseNotice = releaseListError ? notice(`GitHub firmware list: ${releaseListError}`, "warn")
+				: notice(releaseStatus || (releaseListLoading ? "Loading published firmware versions…" : "Choose a GitHub release or select a local firmware file below."), "info");
+			const releasePanel = panel("Published firmware versions",
+				h("p", {}, "Choose a named DM-32UV release from the public Signal Outpost GitHub repository. An internet connection is needed to list or download releases."),
+				h("div", { class: "firmware-release-controls" }, releasePicker,
+					button(releaseListLoading ? "Checking…" : "Refresh list", refreshReleases, { disabled: releaseListLoading || releaseDownloadBusy }),
+					button(releaseDownloadBusy ? "Downloading…" : "Download selected version", downloadRelease,
+						{ primary: true, disabled: !releaseId || releaseListLoading || releaseDownloadBusy })), releaseNotice);
 			const manifest = filePicker("Optional release manifest (.json)", ".json,application/json", async (f) => {
 				try {
 					S.ownManifest = JSON.parse(new TextDecoder().decode(f.data));
+					localManifestPicked = true;
+					S.firmware = null;
 					if (S.localImageFile) await loadOwnImage(S.localImageFile, drawLocal);
 				} catch (e) {
 					S.ownManifest = null;
+					localManifestPicked = false;
 					alert(`Could not read the manifest: ${e?.message || e}`);
 				}
 			});
 			const image = filePicker("Choose firmware image (.bin)", ".bin,application/octet-stream", async (f) => {
 				S.localImageFile = f;
+				S.firmware = null;
+				if (!localManifestPicked) S.ownManifest = null;
 				await loadOwnImage(f, drawLocal);
 			});
 			const localHelp = h("div", { class: "notice warn" },
 				h("p", {}, h("strong", {}, "Use firmware made for the DM-32UV.")),
 				h("p", {}, "Flashing replaces the radio application. Keep the radio powered, do not disconnect the cable, and use the stub route shown in the next steps. The CPS checks the image target and protected ranges before writing."));
 			wrap.replaceChildren(panel("Select firmware",
-				h("p", {}, "The firmware image stays on this computer. If the release includes a matching JSON manifest, choose it first to verify the release hash; otherwise the CPS performs board, size, and flash-range checks."),
-				manifest, image, status, localHelp));
+				h("p", {}, "Select a published firmware version or load your own firmware image. GitHub downloads and local files are checked against the image manifest before the radio is changed."),
+				releasePanel, h("h3", {}, "Use local firmware files"), manifest, image, status, localHelp));
 			S.forward(button("Continue to radio", () => { if (S.firmware) next(); }, { primary: true, disabled: !S.firmware }),
 				"The DM-32UV is preselected. The next steps use the built-in C-SKY stub installer.");
 		};
 		drawLocal();
+		if (!refreshStarted) {
+			refreshStarted = true;
+			void refreshReleases();
+		}
 		return wrap;
 	}
 	const vtitle = (v) => (t(`variant.${v.id}.title`) !== `variant.${v.id}.title` ? t(`variant.${v.id}.title`) : v.title);

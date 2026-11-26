@@ -2,8 +2,9 @@
 
 - Board: Baofeng DM-32UV (`dm32`)
 - Firmware version: `v26.11.25-signal-outpost-blue`
+- Display name: `Signal Outpost Blue — DM-32UV — v26.11.25 (Build b4c6d8b1)`
 - Build ID: `b4c6d8b1-dirty` (local Signal Outpost branding update)
-- Image: `rfoundry-dm32-dm32-sstv-aprs-hotspot-sfr-v26.11.25-signal-outpost-blue.bin`
+- Image: `signal-outpost-dm32uv-v26.11.25-blue.bin`
 - Image size: 707,524 bytes
 - Image SHA-256: `0519b336b43db7b64690febae06392910083f8c78fc7aad78961f26ae37a481d`
 - Flashing route: RadioFoundry stub entry
