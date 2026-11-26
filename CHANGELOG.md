@@ -1,5 +1,11 @@
 # Release notes
 
+## v1.0.7 — Clean up CPS header and intro
+
+### Changed
+
+- Removed the header status pill, redundant feature-availability copy, offline storage note, and offline-copy footer text from the CPS.
+
 ## v1.0.6 — Complete GitHub release publishing
 
 ### Fixed

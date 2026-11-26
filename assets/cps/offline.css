@@ -8,7 +8,6 @@
 .offline-brand small { color:var(--muted); font-size:.75rem; margin-top:.2rem; }
 .offline-signal { color:var(--brand-accent); }
 .offline-header-tools { display:flex; align-items:center; gap:.75rem; }
-.offline-chip { border:1px solid var(--border); border-radius:999px; padding:.25rem .65rem; color:var(--muted); font:600 .68rem var(--font-mono); letter-spacing:.05em; }
 .serial-port-choice { border:1px solid var(--border); border-radius:var(--radius-sm); padding:.45rem .7rem; background:var(--surface); color:var(--text); font:600 .82rem var(--font-sans); cursor:pointer; }
 .serial-port-choice:hover { border-color:var(--brand-accent); color:var(--brand-accent); }
 .serial-port-status { max-width:18rem; overflow:hidden; color:var(--muted); font:500 .7rem var(--font-mono); text-overflow:ellipsis; white-space:nowrap; }
@@ -30,7 +29,6 @@
 .serial-port-dialog-actions button.primary { border-color:var(--brand-accent); background:var(--brand-accent); color:var(--bg); }
 .offline-page-head { padding-top:2rem; padding-bottom:1rem; }
 .offline-page-head h1 { margin-bottom:.45rem; }
-.offline-note { display:inline-block; margin-top:.8rem; padding:.4rem .7rem; border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--muted); font-size:.88rem; }
 .offline-tool-section { padding-top:.5rem; }
 .offline-tool-nav { display:flex; align-items:center; gap:.3rem; margin-bottom:1rem; border-bottom:1px solid var(--border); }
 .offline-tool-tab { border:0; border-bottom:2px solid transparent; padding:.7rem 1rem; background:transparent; color:var(--muted); font:600 .92rem var(--font-sans); cursor:pointer; }
@@ -46,7 +44,6 @@
 @media (max-width: 760px) {
 	.offline-header-row { align-items:flex-start; }
 	.offline-header-tools { flex-wrap:wrap; justify-content:flex-end; }
-	.offline-chip { display:none; }
 	.serial-port-status { width:100%; max-width:100%; text-align:right; }
 	#firmware-frame { min-height:82vh; }
 }
