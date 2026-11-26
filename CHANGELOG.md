@@ -1,3 +1,14 @@
+## v1.1.0 — Publish firmware v1.0.0 and retire the old image
+
+### Added
+
+- Added `signal-outpost-dm32-v1.0.0.bin` with a matching release manifest for the CPS firmware selector.
+- Updated the digital receive AGC response for testing; use **Settings → Sound → Digital RX AGC** to evaluate it.
+
+### Changed
+
+- The CPS firmware selector filters out the retired V26.11.25 firmware by filename and SHA-256, including its duplicate copies across older releases.
+- The public firmware asset contains application firmware only; the stock codec remains outside the repository release.
 # Release notes
 
 ## v1.0.9 — Fix published firmware list

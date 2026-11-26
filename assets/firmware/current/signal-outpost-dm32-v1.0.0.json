@@ -1,0 +1,40 @@
+{
+  "format": "rfoundry-release/1",
+  "board": "dm32",
+  "board_name": "Baofeng DM-32UV",
+  "version": "v1.0.0",
+  "display_name": "Signal Outpost — DM-32UV — v1.0.0",
+  "git": "b4c6d8b1-dirty",
+  "image": {
+    "file": "signal-outpost-dm32-v1.0.0.bin",
+    "size": 708136,
+    "sha256": "5c9d645beeee07f2a0c448a551568dd56e32f029d69b97a1213459e9f688e14d"
+  },
+  "ranges": [
+    {
+      "addr": "0x0300C000",
+      "size": 708136
+    }
+  ],
+  "sectors": [
+    0
+  ],
+  "codec": {
+    "included": false,
+    "profile": "dm32-049",
+    "sectors": [
+      1
+    ],
+    "windows": [
+      {
+        "addr": "0x030E8000",
+        "size": 98304
+      }
+    ],
+    "keep_supported": false
+  },
+  "features": "FM,SUBTONE,DMR,DMR_PRIVACY,DMR_TALKER_ALIAS,DMR_ROAMING,DMR_TRUNK,DMR_TRUNK_TX,DMR_TRUNK_SUPL,DMR_TRUNK_GW,DMR_IP_GATEWAY,DMR_UDP_COMPRESS,NET_TCP,NET_KISS,NET_HTTP,NET_HTTP_GZIP,NET_WEBCTL,NET_RIGCTL,NET_APRSIS,MDNS,TFTP,IDDB_COMPACT,SNMP,SFR,SFR_DUALPATH_RX,SFR_CWID,TASK_STACKS,HOSTLINK,NET_PPP,HOTSPOT,DEBUGLINK,CPS_OPENFW,CPS_FAST,VFO,VFO_FM,VFO_DMR,DIAG,FONT_XL,FONT_AA,FONT_BIG,LANG_ES,UI_COLOR,UI_SETTINGS,SCAN,DUAL_WATCH,BEEP,SIG_TONES,FM_TX_TONES,DTMF,RX_EXT,REF_TRIM,BATTERY_SAVE,GPS,STUB_ENTRY,CRASH_LOG,CRASH_SCREEN,WATCHDOG,FAULT_TRACE,AM_RX,BCAST_FM,APRS,APRS_AFSK,APRS_DMR,APRS_RX,APRS_IGATE,SSTV,GPS_SKY,SATELLITE_TLE,KEY_ASSIGN,CHANNEL_LIST,CHANNEL_EDIT,ZONE_EDIT,CONTACT_EDIT,P25,P25_TRUNK,NXDN,YSF",
+  "toolchain": "csky-elf-gcc (GCC) 14.2.0",
+  "variant": "dm32-sstv-aprs-hotspot-sfr",
+  "feature_notes": "Digital receive AGC response update; enable Digital RX AGC in Sound settings to evaluate."
+}

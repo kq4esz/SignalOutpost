@@ -40,6 +40,11 @@ const nativeSerialPorts = new Map();
 const firmwareReleaseAssets = new Map();
 const FIRMWARE_RELEASES_API = 'https://api.github.com/repos/kq4esz/SignalOutpost/releases?per_page=100';
 const FIRMWARE_RELEASE_BASE = 'https://github.com/kq4esz/SignalOutpost/releases/download/';
+const RETIRED_FIRMWARE_IMAGES = new Set([
+  'signal-outpost-dm32uv-v26.11.25-blue.bin',
+  'rfoundry-dm32-dm32-sstv-aprs-hotspot-sfr-v26.11.25-signal-outpost-blue.bin',
+]);
+const RETIRED_FIRMWARE_DIGESTS = new Set(['0519b336b43db7b64690febae06392910083f8c78fc7aad78961f26ae37a481d']);
 
 app.setAppUserModelId(APP_ID);
 
@@ -304,7 +309,11 @@ function setupNativeSerialAccess() {
     const seenImages = new Set();
     for (const release of releases) {
       if (release.draft || !Array.isArray(release.assets)) continue;
-      for (const image of release.assets.filter((asset) => /\.bin$/i.test(asset.name) && /dm32/i.test(asset.name))) {
+      for (const image of release.assets.filter((asset) => {
+        if (!/\.bin$/i.test(asset.name) || !/dm32/i.test(asset.name)) return false;
+        const digest = String(asset.digest || '').replace(/^sha256:/i, '').toLowerCase();
+        return !RETIRED_FIRMWARE_IMAGES.has(asset.name.toLowerCase()) && !RETIRED_FIRMWARE_DIGESTS.has(digest);
+      })) {
         const manifest = release.assets.find((asset) => asset.name.toLowerCase() === image.name.replace(/\.bin$/i, '.json').toLowerCase());
         if (!manifest || image.state !== 'uploaded' || manifest.state !== 'uploaded') continue;
         const identity = image.digest || image.name;
