@@ -1,0 +1,10 @@
+{
+  "variants": [
+    {
+      "id": "full",
+      "title": "Full image",
+      "summary": "A firmware image selected from this computer",
+      "off": []
+    }
+  ]
+}

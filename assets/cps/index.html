@@ -22,18 +22,32 @@
 			<img src="./static/img/signal-outpost-mark.svg" alt="Signal Outpost mark" width="48" height="48">
 			<span><strong><span class="offline-signal">Signal</span> Outpost</strong><small>by KQ4ESZ</small></span>
 		</a>
-		<div class="offline-header-tools"><span class="offline-chip">LOCAL CPS · OFFLINE · YSF · SCAN LIST</span><button class="theme-toggle" type="button" aria-label="Switch color theme" title="Switch color theme">◐</button></div>
+		<div class="offline-header-tools">
+			<span class="offline-chip">LOCAL CPS · OFFLINE · YSF · SCAN LIST</span>
+			<button id="serial-port-choice" class="serial-port-choice" type="button">Choose COM port</button>
+			<span id="serial-port-status" class="serial-port-status" role="status">No port selected</span>
+			<button class="theme-toggle" type="button" aria-label="Switch color theme" title="Switch color theme">◐</button>
+		</div>
 	</div>
 </header>
 <main id="main">
 	<section class="wrap section page-head offline-page-head">
 		<p class="eyebrow">Baofeng DM-32UV · Local radio programmer</p>
-		<h1>Codeplug Studio</h1>
-		<p class="lead">Build and program your channels, contacts, zones, and digital modes. YSF repeater headers and the Global Scan List are included alongside DMR, P25, and NXDN.</p>
-		<p class="offline-note">Runs from this folder. Your codeplug stays on this computer and is sent only to the radio you connect.</p>
+		<h1>Signal Outpost CPS</h1>
+		<p class="lead">Program codeplugs or install Signal Outpost firmware for the DM-32UV. YSF repeater headers and the Global Scan List are included alongside DMR, P25, and NXDN.</p>
+		<p class="offline-note">Runs from this folder. Your codeplug and firmware stay on this computer and are sent only to the radio you connect.</p>
 	</section>
-	<section class="wrap section offline-editor-section">
-		<div id="editor" class="editor"><p class="muted">Loading Signal Outpost Codeplug Studio…</p></div>
+	<section class="wrap section offline-tool-section">
+		<nav class="offline-tool-nav" aria-label="CPS tools">
+			<button class="offline-tool-tab active" type="button" data-tool-view="codeplug" aria-selected="true">Codeplug</button>
+			<button class="offline-tool-tab" type="button" data-tool-view="firmware" aria-selected="false">Firmware</button>
+		</nav>
+		<div id="codeplug-view" class="offline-tool-view">
+			<div id="editor" class="editor"><p class="muted">Loading Signal Outpost Codeplug Studio…</p></div>
+		</div>
+		<div id="firmware-view" class="offline-tool-view" hidden>
+			<iframe id="firmware-frame" title="Signal Outpost DM-32UV firmware installer" loading="lazy"></iframe>
+		</div>
 		<noscript><p class="notice">This programmer needs JavaScript enabled.</p></noscript>
 	</section>
 </main>

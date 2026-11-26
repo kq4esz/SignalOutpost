@@ -1,5 +1,19 @@
 # Release notes
 
+## v1.0.2 — Local firmware installer and COM port selection
+
+### Added
+
+- Added a **Choose COM port** control to the CPS header. The selected serial device is preferred by both codeplug reads/writes and the firmware installer.
+- Added a dedicated **Firmware** view with a local DM-32UV `.bin` picker and optional release-manifest verification.
+- Bundled the C-SKY stub, DM-32UV flash layout, and codec-map metadata needed for offline firmware installation.
+- Firmware flashing uses the existing protected-range checks and RadioFoundry stub flow; it does not request a remote build.
+
+### Notes
+
+- The radio still has to enter the state requested by the installer. Do not disconnect power or the programming cable during a write.
+- Firmware compatibility is checked before flashing, but on-air behavior still needs radio testing.
+
 ## v1.0.1 — Signal Outpost light blue branding
 
 ### Changed

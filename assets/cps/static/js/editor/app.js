@@ -6,7 +6,7 @@
 
 import { h, t, ROOT, HOME, button, notice, download, progressBar, num as fmtNum, date as fmtDate } from "../flasher/dom.js";
 import { equal } from "../flasher/bytes.js";
-import { SerialStream, serialSupported, serialApi, RFOUNDRY_USB, browserErrorKey, noDeviceChosen, knownRadioPort } from "../flasher/link.js";
+import { SerialStream, serialSupported, serialApi, RFOUNDRY_USB, browserErrorKey, noDeviceChosen, knownRadioPort, preferredRadioPort } from "../flasher/link.js";
 import { CodeplugImage, IDDB_HEADER, EDITOR_REGIONS } from "../codeplug/image.js";
 import { decode, encode, empty, remove, validate, newChannel, newContact, numberAll, assignNumbers } from "../codeplug/model.js";
 import { LIMITS, decodeGeneral } from "../codeplug/records.js";
@@ -680,11 +680,12 @@ async function connect() {
 		// its serial port first, where WebUSB reaches it (netmode.js); it goes back when it restarts. The wait is short:
 		// the chooser below must still open in this click
 		await toSerial({ http: false, ms: CLICK_WAIT_MS });
-		const known = await knownRadioPort([RFOUNDRY_USB, ...CABLES]);
-		let port = known?.port;
+		const filters = [RFOUNDRY_USB, ...CABLES];
+		const known = await knownRadioPort(filters);
+		let port = known?.port || preferredRadioPort(filters);
 		if (!port) {
 			try {
-				port = await serialApi().requestPort({ filters: [RFOUNDRY_USB, ...CABLES] });
+				port = await serialApi().requestPort({ filters });
 			} catch (e) {
 				if (e?.name !== "NotFoundError") throw e;
 				say(t("editor.connect.none"), "warn");

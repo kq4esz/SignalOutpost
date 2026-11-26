@@ -1,9 +1,65 @@
 {
   "radios": [
     {
-      "model": "DM-32UV",
       "id": "dm32",
+      "name": "Baofeng DM-32UV",
+      "model": "DM-32UV",
       "maker": "Baofeng",
+      "kind": "handheld",
+      "status": "supported",
+      "release": "stable",
+      "bands": "VHF / UHF",
+      "power": "High / Low",
+      "cpu": "C-SKY HR_C7000",
+      "display": "color",
+      "gallery": null,
+      "frame_image": null,
+      "frame_geometry": null,
+      "flash": {
+        "backend": "c7000-stub",
+        "board": "dm32",
+        "family": "serial-loader",
+        "link": "serial-cable",
+        "bootloader": [
+          "Turn the radio off and connect the programming cable.",
+          "Hold PTT and SK1.",
+          "Turn the radio on while you hold both keys. The green LED lights.",
+          "Release the keys."
+        ],
+        "bootloader_hold": [
+          "ptt",
+          "sk1"
+        ],
+        "update_mode": "baofeng",
+        "debuglink_names": [
+          "DM-32UV",
+          "DM-32",
+          "dm32"
+        ],
+        "stock_console": null,
+        "build_options": [],
+        "first_stage": null,
+        "protect": [
+          {
+            "mem": "data",
+            "start": 4096,
+            "end": 823296,
+            "what": "factory calibration: the stock codeplug area's 4 KB page tagged 2, which can be any page of it (hardware-dm32.md 10.1, 11.1)"
+          },
+          {
+            "mem": "data",
+            "start": 7405568,
+            "end": 7409664,
+            "what": "a decoded calibration copy an earlier firmware left, the fallback when no factory page is found (hardware-dm32.md 10.1, 17)"
+          }
+        ],
+        "stub_tested": true
+      },
+      "backup": {
+        "stock": "none",
+        "rfoundry": "full",
+        "spi_size": 16777216
+      },
       "codeplug": {
         "base": 7340032,
         "end": 15728640,
@@ -14,7 +70,16 @@
           "dm32"
         ]
       },
-      "name": "Baofeng DM-32UV"
+      "unsupported": [],
+      "not_written": [],
+      "default_off": {},
+      "required": [],
+      "config": {
+        "full": []
+      },
+      "variants": [],
+      "volts": null,
+      "clock": null
     }
   ]
 }

@@ -11,15 +11,15 @@ same release includes the current DM-32UV firmware image, manifest, checksum, an
 
 ## Install and use
 
-1. Run `Signal-Outpost-CPS-1.0.1-x64-Setup.exe` and complete the installer.
+1. Run `Signal-Outpost-CPS-1.0.2-x64-Setup.exe` and complete the installer.
 2. Open **Signal Outpost CPS** from the Start menu or desktop.
-3. Connect the DM-32UV programming cable, then use **Read from Radio** or **Write to Radio**.
-4. Select the radio's serial device in the app's chooser when asked.
+3. Connect the DM-32UV programming cable and use **Choose COM port** in the CPS header to select it.
+4. Use **Read from Radio** or **Write to Radio** for codeplug programming, or open **Firmware** to select and flash a local image.
 
 The CPS runs offline. It keeps the codeplug in this computer's app storage and communicates with the radio only when
 you choose a read or write operation. The app checks GitHub Releases for CPS updates and asks before restarting to
-install one. Firmware must be flashed using the firmware flashing workflow described in the firmware release notes;
-it is not silently installed by the CPS updater.
+install one. Firmware flashing is a separate user-started operation in the **Firmware** section; the selected image is
+checked locally and is not fetched from a build service.
 
 ## Firmware distribution
 

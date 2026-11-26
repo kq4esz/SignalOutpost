@@ -28,7 +28,7 @@ import { radioPicture, holdKeys, hasNoScreen } from "./radiotop.js";
 import { validRef, refShort, defaultRef, firmwareName, betaLink } from "./version.js";
 import { verify, segments, forDevBuild } from "./manifest.js";
 import { Dfu, DfuError, NormalModeError, WebUsbTransport, checkKey, usbSupported } from "./dfu.js";
-import { Link, LinkError, CableError, SerialStream, RFOUNDRY_USB, RFOUNDRY_NET, probe, whyNoAnswer, noAnswerKey, serialSupported, serialApi, browserErrorKey, noDeviceChosen, knownRadioPort } from "./link.js";
+import { Link, LinkError, CableError, SerialStream, RFOUNDRY_USB, RFOUNDRY_NET, probe, whyNoAnswer, noAnswerKey, serialSupported, serialApi, browserErrorKey, noDeviceChosen, knownRadioPort, preferredRadioPort } from "./link.js";
 import { readRadio, makeBundle, openBundle, bundleFolder, notBundle, bundleName, describeFirmware, CODEPLUG_SPAN } from "./backup.js";
 import { targets, planInternal, planStock, codeplugSectors, writeCodeplug, codeplugLayout } from "./restore.js";
 import { Selection } from "./select.js";
@@ -152,6 +152,8 @@ const API = "https://api.radiofoundry.org/v1/";
 // minimal non-invasive reporting for helping the RadioFoundry project track programming failures; opt out with
 // ?reporting=0
 const FLASH_LOG = new URLSearchParams(location.search).get("reporting") !== "0";
+// The desktop CPS exposes a fully local path: no build-service request, and no flash telemetry.
+const LOCAL_FLASH = new URLSearchParams(location.search).has("local");
 
 // A version link (/flash/?version=<tag, full commit hash or branch name>) builds that version instead of the latest release. The tab keeps
 // it for the session, so a reload or a visit to another page doesn't lose it; ?version= (empty) or the banner drops it.
@@ -491,8 +493,9 @@ async function connectSerial() {
 	else {
 		if (!serialSupported()) throw new Error(t("flash.err.no_serial"));
 		if (await networkModeSeen() && !(await leaveNetworkMode())) throw new NetworkModeError();
-		const granted = await grantedRFoundryPorts();
-		stream = granted.length ? await SerialStream.open(granted[0]) : await SerialStream.request();
+		const preferred = preferredRadioPort([RFOUNDRY_USB, ...c7ui.CABLES]);
+		const granted = preferred ? [] : await grantedRFoundryPorts();
+		stream = preferred ? await SerialStream.open(preferred) : granted.length ? await SerialStream.open(granted[0]) : await SerialStream.request();
 		useAdapter(adapter.fromSerialInfo(stream.port?.getInfo?.()));
 	}
 	S.link = new Link(stream);
@@ -925,8 +928,10 @@ async function connectForUpdate(status) {
 		if (!serialSupported()) throw new Error(t("flash.err.no_serial"));
 		if (await networkModeSeen() && !(await leaveNetworkMode())) throw new NetworkModeError();
 		// a port granted before where RadioFoundry answers needs no chooser
-		const known = await knownRadioPort([RFOUNDRY_USB, ...c7ui.CABLES]);
-		stream = known?.stream || await SerialStream.open(await serialApi().requestPort({ filters: [RFOUNDRY_USB, ...c7ui.CABLES] }));
+		const filters = [RFOUNDRY_USB, ...c7ui.CABLES];
+		const known = await knownRadioPort(filters);
+		const preferred = known ? null : preferredRadioPort(filters);
+		stream = known?.stream || await SerialStream.open(preferred || await serialApi().requestPort({ filters }));
 		link = new Link(stream, { timeout: 1200 });
 	}
 	status.replaceChildren(h("p", { class: "muted" }, t("flash.now.connecting")));
@@ -1173,6 +1178,36 @@ function selectRadio(r) {
 function buildView() {
 	const sel = S.selection;
 	const wrap = h("div", { class: "flasher" });
+	if (LOCAL_FLASH) {
+		const drawLocal = () => {
+			const status = S.firmware
+				? notice(`${S.firmware.source} · ${S.firmware.image.length.toLocaleString()} bytes · ${S.firmware.manifest.dev_build ? "local SHA-256 calculated" : "manifest SHA-256 verified"}`, "ok")
+				: notice("Choose a DM-32UV firmware .bin file from this computer. The selected file is checked locally before the radio is changed.", "info");
+			const manifest = filePicker("Optional release manifest (.json)", ".json,application/json", async (f) => {
+				try {
+					S.ownManifest = JSON.parse(new TextDecoder().decode(f.data));
+					if (S.localImageFile) await loadOwnImage(S.localImageFile, drawLocal);
+				} catch (e) {
+					S.ownManifest = null;
+					alert(`Could not read the manifest: ${e?.message || e}`);
+				}
+			});
+			const image = filePicker("Choose firmware image (.bin)", ".bin,application/octet-stream", async (f) => {
+				S.localImageFile = f;
+				await loadOwnImage(f, drawLocal);
+			});
+			const localHelp = h("div", { class: "notice warn" },
+				h("p", {}, h("strong", {}, "Use firmware made for the DM-32UV.")),
+				h("p", {}, "Flashing replaces the radio application. Keep the radio powered, do not disconnect the cable, and use the stub route shown in the next steps. The CPS checks the image target and protected ranges before writing."));
+			wrap.replaceChildren(panel("Select firmware",
+				h("p", {}, "The firmware image stays on this computer. If the release includes a matching JSON manifest, choose it first to verify the release hash; otherwise the CPS performs board, size, and flash-range checks."),
+				manifest, image, status, localHelp));
+			S.forward(button("Continue to radio", () => { if (S.firmware) next(); }, { primary: true, disabled: !S.firmware }),
+				"The DM-32UV is preselected. The next steps use the built-in C-SKY stub installer.");
+		};
+		drawLocal();
+		return wrap;
+	}
 	const vtitle = (v) => (t(`variant.${v.id}.title`) !== `variant.${v.id}.title` ? t(`variant.${v.id}.title`) : v.title);
 	const gtitle = (g) => (t(`group.${slug(g)}`) !== `group.${slug(g)}` ? t(`group.${slug(g)}`) : g);
 	const supportedCount = S.data.features.filter((f) => sel.supported(f.name) && !startCode(f.name)).length;

@@ -542,10 +542,22 @@ export async function probe(link) {
 // chooser with these filters would list them
 export async function grantedPorts(filters) {
 	if (!serialSupported()) return [];
-	return (await serialApi().getPorts()).filter((p) => {
+	const ports = (await serialApi().getPorts()).filter((p) => {
 		const i = p.getInfo();
 		return filters.some((f) => i.usbVendorId === f.usbVendorId && (f.usbProductId === undefined || i.usbProductId === f.usbProductId));
 	});
+	const selected = preferredRadioPort(filters);
+	return selected ? [selected, ...ports.filter((p) => p !== selected)] : ports;
+}
+
+// The offline CPS can select a programming port before opening either the codeplug editor or the firmware tool.
+// In the firmware iframe the selected Web Serial object lives on the same-origin parent page.
+export function preferredRadioPort(filters) {
+	let port = null;
+	try { port = globalThis.__signalOutpostPreferredSerialPort || globalThis.parent?.__signalOutpostPreferredSerialPort || null; } catch { /* cross-origin page */ }
+	if (!port?.getInfo) return null;
+	const i = port.getInfo();
+	return filters.some((f) => i.usbVendorId === f.usbVendorId && (f.usbProductId === undefined || i.usbProductId === f.usbProductId)) ? port : null;
 }
 
 // A granted port (grantedPorts) whose radio answers, so the page needs no chooser: want(probe) says whether it's the

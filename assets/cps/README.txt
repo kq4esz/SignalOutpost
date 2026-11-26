@@ -3,8 +3,9 @@ Signal Outpost CPS — offline DM-32UV codeplug programmer
 START
 1. Double-click Launch-Signal-Outpost-CPS.cmd.
 2. Open the page in Chrome or Edge at http://127.0.0.1:8776/.
-3. Connect the programming cable or radio USB serial port, then use Read from Radio or Write to Radio.
-4. Close the local server window when finished.
+3. Use Choose COM port in the CPS header to select the programming cable or radio USB serial port.
+4. Use Read from Radio or Write to Radio for codeplug work, or choose Firmware to install a local DM-32UV image.
+5. Close the local server window when finished.
 
 The page and programming code are served from this folder. It does not need an Internet connection. Keep the radio
 connected only when you are ready to read or write it. Directly opening index.html with file:// will not allow the
@@ -22,9 +23,14 @@ Open the Global Scan List tab and choose Add or remove channels to build the lis
 eligible channels in one global list. The Scan key on the radio starts or stops it; it scans in channel-number order,
 returns briefly to the parked channel after a call and resumes. All-Channel Scan Skip excludes a selected channel.
 
+FIRMWARE INSTALLATION
+The Firmware tab accepts a local .bin image and an optional matching release manifest. It validates the image for the
+DM-32UV and flashes it with the C-SKY stub workflow. The radio must be in the state requested by the installer; keep
+the battery charged and cable connected throughout the transfer. The CPS does not build firmware or download an image.
+
 OFFLINE LIMITS
 DMR ID data can be loaded from a local user.csv or compatible CSV. RadioID web lookup and download links are disabled
-in this offline copy. Firmware updates and online error reporting are not part of this CPS bundle.
+in this offline copy. Online error reporting is not part of this CPS bundle.
 
 BRANDING AND LICENSES
 The Signal Outpost logo assets are by KQ4ESZ and their GPL-3.0 license is in LICENSES/Signal-Outpost-Branding-GPL-3.0.txt.

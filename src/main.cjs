@@ -159,6 +159,11 @@ function setupSerialAccess(window) {
     }).then(({ response }) => {
       const selected = response >= 0 && response < ports.length ? ports[response] : null;
       callback(selected ? selected.portId : '');
+      if (selected) {
+        const label = selected.portName || selected.displayName || selected.manufacturer || 'Selected serial port';
+        const event = `window.dispatchEvent(new CustomEvent('signal-outpost:serial-port-selected',{detail:${JSON.stringify(label)}}))`;
+        contents.executeJavaScript(event).catch(() => {});
+      }
     }).catch(() => callback(''));
   });
   session.on('select-usb-device', (event, details, callback) => {
