@@ -1,5 +1,11 @@
 # Release notes
 
+## v1.0.9 — Fix published firmware list
+
+### Fixed
+
+- Fixed the Firmware page in the desktop CPS so it can reach the native GitHub release bridge from its embedded installer frame. Published firmware versions now load in the version selector.
+
 ## v1.0.8 — Named firmware releases and clearer flash steps
 
 ### Added

@@ -62,6 +62,14 @@ import { readDfuInfo, choiceFor, hwoptAction, pendingHwopt, majorsFor, runsOrigi
 import { readOriginal, deviceKind, spiSeconds, Guard } from "./origbackup.js";
 import { toSerial, CLICK_WAIT_MS } from "./netmode.js";
 
+function nativeDesktopBridge() {
+	try {
+		if (window.signalOutpostNative) return window.signalOutpostNative;
+		if (window.parent !== window) return window.parent.signalOutpostNative || null;
+	} catch {}
+	return null;
+}
+
 // ---------------------------------------------------------------------------------------------------------------
 // strings and DOM
 
@@ -1212,10 +1220,11 @@ function buildView() {
 			releaseStatus = "Checking GitHub for published DM-32UV firmware…";
 			drawLocal();
 			try {
-				if (!window.signalOutpostNative?.listFirmwareReleases) {
+				const desktopBridge = nativeDesktopBridge();
+				if (!desktopBridge?.listFirmwareReleases) {
 					throw new Error("GitHub firmware downloads are available in the installed Signal Outpost CPS. Local firmware files still work here.");
 				}
-				releaseList = await window.signalOutpostNative.listFirmwareReleases();
+				releaseList = await desktopBridge.listFirmwareReleases();
 				if (!releaseList.some((entry) => entry.id === releaseId)) releaseId = "";
 				releaseStatus = releaseList.length
 					? `${releaseList.length} unique DM-32UV firmware version${releaseList.length === 1 ? "" : "s"} found. Downloads are verified against the release manifest.`
@@ -1241,9 +1250,11 @@ function buildView() {
 			localManifestPicked = false;
 			drawLocal();
 			try {
+				const desktopBridge = nativeDesktopBridge();
+				if (!desktopBridge?.downloadFirmwareAsset) throw new Error("The desktop firmware download bridge is unavailable. Restart the CPS and refresh the release list.");
 				const [manifestFile, imageFile] = await Promise.all([
-					window.signalOutpostNative.downloadFirmwareAsset(selected.manifestAssetId),
-					window.signalOutpostNative.downloadFirmwareAsset(selected.imageAssetId),
+					desktopBridge.downloadFirmwareAsset(selected.manifestAssetId),
+					desktopBridge.downloadFirmwareAsset(selected.imageAssetId),
 				]);
 				const manifest = JSON.parse(new TextDecoder().decode(manifestFile.data));
 				if (manifest.board !== S.board.id) throw new Error("The selected release manifest is for another radio board.");
