@@ -2,18 +2,18 @@
   "format": "rfoundry-release/1",
   "board": "dm32",
   "board_name": "Baofeng DM-32UV",
-  "version": "v26.11.25-ysf-k4gv-repeater",
+  "version": "v26.11.25-signal-outpost-blue",
   "git": "b4c6d8b1",
   "git_full": "b4c6d8b10aee304593e2d830452d27410d718730",
   "image": {
-    "file": "rfoundry-dm32-dm32-sstv-aprs-hotspot-sfr-v26.11.25-ysf-k4gv-repeater.bin",
-    "size": 707468,
-    "sha256": "31e425600b5e8de7db568b497158dddc782f5a4454536417627b2436421365cf"
+    "file": "rfoundry-dm32-dm32-sstv-aprs-hotspot-sfr-v26.11.25-signal-outpost-blue.bin",
+    "size": 707524,
+    "sha256": "0519b336b43db7b64690febae06392910083f8c78fc7aad78961f26ae37a481d"
   },
   "ranges": [
     {
       "addr": "0x0300C000",
-      "size": 707468
+      "size": 707524
     }
   ],
   "sectors": [

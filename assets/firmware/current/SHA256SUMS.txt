@@ -1,2 +1,2 @@
-31e425600b5e8de7db568b497158dddc782f5a4454536417627b2436421365cf  rfoundry-dm32-dm32-sstv-aprs-hotspot-sfr-v26.11.25-ysf-k4gv-repeater.bin
-d5f3738c3609509cff9e7f1a28210fa143bfa7a0f160173ef1c0506221c77240  rfoundry-dm32-dm32-sstv-aprs-hotspot-sfr-v26.11.25-ysf-k4gv-repeater.json
+0519b336b43db7b64690febae06392910083f8c78fc7aad78961f26ae37a481d  rfoundry-dm32-dm32-sstv-aprs-hotspot-sfr-v26.11.25-signal-outpost-blue.bin
+e68e029230f84080a5737468380581e08bdc2f6830c34b501f5a6376ebf50b23  rfoundry-dm32-dm32-sstv-aprs-hotspot-sfr-v26.11.25-signal-outpost-blue.json

@@ -4,7 +4,7 @@
   <title>Signal Outpost by KQ4ESZ programming header lockup</title>
   <image href="signal-outpost-mark.svg" x="8" y="8" width="96" height="96"/>
   <text x="124" y="53" font-family="Arial, sans-serif" font-size="36" font-weight="700">
-    <tspan fill="#c7f36b">Signal</tspan><tspan fill="#eceef0"> Outpost</tspan>
+    <tspan fill="#63c7f5">Signal</tspan><tspan fill="#eceef0"> Outpost</tspan>
   </text>
   <text x="126" y="82" fill="#a6adb6" font-family="Arial, sans-serif" font-size="16" letter-spacing="1">by KQ4ESZ</text>
 </svg>

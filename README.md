@@ -11,7 +11,7 @@ same release includes the current DM-32UV firmware image, manifest, checksum, an
 
 ## Install and use
 
-1. Run `Signal-Outpost-CPS-1.0.0-x64-Setup.exe` and complete the installer.
+1. Run `Signal-Outpost-CPS-1.0.1-x64-Setup.exe` and complete the installer.
 2. Open **Signal Outpost CPS** from the Start menu or desktop.
 3. Connect the DM-32UV programming cable, then use **Read from Radio** or **Write to Radio**.
 4. Select the radio's serial device in the app's chooser when asked.

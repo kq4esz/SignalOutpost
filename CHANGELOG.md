@@ -1,5 +1,18 @@
 # Release notes
 
+## v1.0.1 — Signal Outpost light blue branding
+
+### Changed
+
+- Recolored the Signal Outpost CPS logo, application icon, and brand wordmark from green to light blue.
+- Matched the radio boot logo and wordmark to the same light blue brand color, with a darker blue variant on the light display theme for contrast.
+- Kept green receive and status indicators unchanged.
+
+### Firmware
+
+- Rebuilt the DM-32UV test image with the matching light-blue boot logo and wordmark. The image keeps the existing feature set, includes no codec, and uses the stub-entry flashing route.
+- Radio operation has not been re-tested with this branding-only build.
+
 ## v1.0.0 — Signal Outpost CPS desktop preview
 
 ### Added
