@@ -13,6 +13,21 @@
 .serial-port-choice:hover { border-color:var(--brand-accent); color:var(--brand-accent); }
 .serial-port-status { max-width:18rem; overflow:hidden; color:var(--muted); font:500 .7rem var(--font-mono); text-overflow:ellipsis; white-space:nowrap; }
 .serial-port-status.selected { color:var(--brand-accent); }
+.serial-port-choice:disabled { cursor:wait; opacity:.7; }
+.serial-port-dialog { width:min(34rem,calc(100vw - 2rem)); max-width:none; padding:0; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); color:var(--text); box-shadow:0 1.5rem 5rem #0008; }
+.serial-port-dialog::backdrop { background:#050a12b8; backdrop-filter:blur(3px); }
+.serial-port-dialog-content { display:grid; gap:.8rem; padding:1.2rem; }
+.serial-port-dialog h2 { margin:0; font-size:1.15rem; }
+.serial-port-dialog p { margin:0; color:var(--muted); font-size:.88rem; line-height:1.45; }
+.serial-port-dialog label { color:var(--text); font-size:.84rem; font-weight:650; }
+#serial-port-list { width:100%; min-height:11rem; border:1px solid var(--border); border-radius:var(--radius-sm); padding:.3rem; background:var(--bg); color:var(--text); font:500 .9rem var(--font-sans); }
+#serial-port-list option { padding:.4rem .5rem; }
+.serial-port-dialog .serial-port-dialog-error { color:var(--danger,var(--brand-accent)); }
+.serial-port-dialog-actions { display:flex; align-items:center; gap:.5rem; }
+.serial-port-dialog-actions span { flex:1; }
+.serial-port-dialog-actions button { border:1px solid var(--border); border-radius:var(--radius-sm); padding:.45rem .7rem; background:var(--surface); color:var(--text); font:600 .8rem var(--font-sans); cursor:pointer; }
+.serial-port-dialog-actions button:hover { border-color:var(--brand-accent); color:var(--brand-accent); }
+.serial-port-dialog-actions button.primary { border-color:var(--brand-accent); background:var(--brand-accent); color:var(--bg); }
 .offline-page-head { padding-top:2rem; padding-bottom:1rem; }
 .offline-page-head h1 { margin-bottom:.45rem; }
 .offline-note { display:inline-block; margin-top:.8rem; padding:.4rem .7rem; border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--muted); font-size:.88rem; }

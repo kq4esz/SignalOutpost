@@ -169,7 +169,7 @@ async function openCable(any = false) {
 	if (c.stream) return c.stream;
 	if (S().fakeC7) return (c.stream = S().fakeC7.stream);
 	if (!serialSupported()) throw new Error(t("flash.err.no_serial"));
-	const preferred = any ? null : preferredRadioPort(CABLES);
+	const preferred = preferredRadioPort(CABLES);
 	// no chooser for a cable granted before: the one where this radio answers as RadioFoundry, else the only one plugged
 	// in (the radio may be off or on its original firmware: the connect step finds out)
 	const known = any || preferred ? null : await knownRadioPort(CABLES, (p) => S().board.debuglink_names.includes(p.board));

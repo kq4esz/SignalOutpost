@@ -556,6 +556,7 @@ export function preferredRadioPort(filters) {
 	let port = null;
 	try { port = globalThis.__signalOutpostPreferredSerialPort || globalThis.parent?.__signalOutpostPreferredSerialPort || null; } catch { /* cross-origin page */ }
 	if (!port?.getInfo) return null;
+	if (port.__signalOutpostNativeSerial === true) return port;
 	const i = port.getInfo();
 	return filters.some((f) => i.usbVendorId === f.usbVendorId && (f.usbProductId === undefined || i.usbProductId === f.usbProductId)) ? port : null;
 }

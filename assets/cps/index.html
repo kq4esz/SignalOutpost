@@ -30,6 +30,21 @@
 		</div>
 	</div>
 </header>
+<dialog id="serial-port-dialog" class="serial-port-dialog" aria-labelledby="serial-port-dialog-title">
+	<div class="serial-port-dialog-content">
+		<h2 id="serial-port-dialog-title">Choose a Windows COM port</h2>
+		<p id="serial-port-dialog-help">Select an installed serial port. The radio connection opens only when you start a read, write, or firmware operation.</p>
+		<label for="serial-port-list">Available COM ports</label>
+		<select id="serial-port-list" size="7" aria-describedby="serial-port-dialog-help"></select>
+		<p id="serial-port-dialog-error" class="serial-port-dialog-error" role="status" hidden></p>
+		<div class="serial-port-dialog-actions">
+			<button id="serial-port-refresh" type="button">Refresh list</button>
+			<span></span>
+			<button id="serial-port-cancel" type="button">Cancel</button>
+			<button id="serial-port-confirm" type="button" class="primary">Use selected port</button>
+		</div>
+	</div>
+</dialog>
 <main id="main">
 	<section class="wrap section page-head offline-page-head">
 		<p class="eyebrow">Baofeng DM-32UV · Local radio programmer</p>

@@ -1,15 +1,15 @@
 Signal Outpost CPS — offline DM-32UV codeplug programmer
 
 START
-1. Double-click Launch-Signal-Outpost-CPS.cmd.
-2. Open the page in Chrome or Edge at http://127.0.0.1:8776/.
-3. Use Choose COM port in the CPS header to select the programming cable or radio USB serial port.
-4. Use Read from Radio or Write to Radio for codeplug work, or choose Firmware to install a local DM-32UV image.
-5. Close the local server window when finished.
+1. Install Signal-Outpost-CPS-1.0.5-x64-Setup.exe and open Signal Outpost CPS from the Start menu.
+2. Use Choose COM port to select the programming cable from the Windows COM port list. The desktop app can list ports such as COM4 even when Chromium's device picker omits the adapter.
+3. Use Read from Radio or Write to Radio for codeplug work, or choose Firmware to install a local DM-32UV image.
 
-The page and programming code are served from this folder. It does not need an Internet connection. Keep the radio
-connected only when you are ready to read or write it. Directly opening index.html with file:// will not allow the
-browser's Web Serial API; use the launcher and localhost instead.
+The optional Launch-Signal-Outpost-CPS.cmd browser launcher is a Web Serial fallback. Browser security prevents it from listing every Windows COM port; if the cable is missing from the browser chooser, use the installed desktop app.
+
+The CPS works offline. Keep the radio connected only when you are ready to read or write it. Directly opening index.html
+with file:// is unsupported. The optional browser launcher uses Web Serial and may not show every Windows COM port;
+the installed desktop app uses Windows' native COM port list.
 
 YSF PROGRAMMING
 YSF is a selectable conventional channel mode alongside DMR, P25, and NXDN. Enter the channel RX/TX frequencies and

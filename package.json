@@ -1,6 +1,6 @@
 {
   "name": "signal-outpost-cps",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Offline desktop codeplug programmer for Signal Outpost DM-32UV firmware",
   "author": "KQ4ESZ",
   "license": "GPL-3.0-only",
@@ -20,7 +20,8 @@
     "release": "electron-builder --win nsis --publish always"
   },
   "dependencies": {
-    "electron-updater": "6.8.11"
+    "electron-updater": "6.8.11",
+    "serialport": "13.0.0"
   },
   "devDependencies": {
     "electron": "45.5.0",

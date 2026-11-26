@@ -1,5 +1,6 @@
-const { app, BrowserWindow, dialog, Menu, shell } = require('electron');
+const { app, BrowserWindow, dialog, Menu, shell, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
+const { SerialPort } = require('serialport');
 const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
@@ -35,6 +36,7 @@ let mainWindow;
 let localServer;
 let downloadedUpdate = false;
 let updateCheckPending = false;
+const nativeSerialPorts = new Map();
 
 app.setAppUserModelId(APP_ID);
 
@@ -214,6 +216,78 @@ function setupSerialAccess(window) {
   });
 }
 
+function setupNativeSerialAccess() {
+  const trusted = (event) => isTrustedAppPage(event.sender);
+  ipcMain.handle('signal-outpost:serial-list', async (event) => {
+    if (!trusted(event)) throw new Error('Serial access is limited to Signal Outpost CPS.');
+    const ports = await SerialPort.list();
+    return ports.filter((port) => /^COM\d+$/i.test(port.path || '')).map((port) => ({
+      path: port.path,
+      friendlyName: port.friendlyName || port.manufacturer || '',
+      manufacturer: port.manufacturer || '',
+      vendorId: port.vendorId || null,
+      productId: port.productId || null,
+      serialNumber: port.serialNumber || null,
+    }));
+  });
+  ipcMain.handle('signal-outpost:serial-open', async (event, pathName, baudRate) => {
+    if (!trusted(event)) throw new Error('Serial access is limited to Signal Outpost CPS.');
+    if (typeof pathName !== 'string' || !/^COM\d+$/i.test(pathName)) throw new Error('Choose a Windows COM port from the CPS list.');
+    const listed = await SerialPort.list();
+    const portInfo = listed.find((port) => (port.path || '').toUpperCase() === pathName.toUpperCase());
+    if (!portInfo) throw new Error(`${pathName} is no longer available. Refresh the COM port list and select it again.`);
+    const key = pathName.toUpperCase();
+    const existing = nativeSerialPorts.get(key);
+    if (existing?.port.isOpen) throw new Error(`${pathName} is already open in the CPS.`);
+
+    const port = new SerialPort({
+      path: portInfo.path,
+      baudRate: Number(baudRate) || 115200,
+      dataBits: 8,
+      stopBits: 1,
+      parity: 'none',
+      rtscts: false,
+      autoOpen: false,
+    });
+    const sender = event.sender;
+    const send = (channel, payload) => {
+      if (!sender.isDestroyed()) sender.send(channel, payload);
+    };
+    nativeSerialPorts.set(key, { port, sender });
+    port.on('data', (data) => send('signal-outpost:serial-data', { path: key, data: Uint8Array.from(data) }));
+    port.on('error', (error) => send('signal-outpost:serial-error', { path: key, message: error.message || String(error) }));
+    port.on('close', () => {
+      if (nativeSerialPorts.get(key)?.port === port) nativeSerialPorts.delete(key);
+      send('signal-outpost:serial-closed', { path: key });
+    });
+    try {
+      await new Promise((resolve, reject) => port.open((error) => error ? reject(error) : resolve()));
+    } catch (error) {
+      if (nativeSerialPorts.get(key)?.port === port) nativeSerialPorts.delete(key);
+      throw error;
+    }
+    return { path: portInfo.path };
+  });
+  ipcMain.handle('signal-outpost:serial-write', async (event, pathName, data) => {
+    if (!trusted(event)) throw new Error('Serial access is limited to Signal Outpost CPS.');
+    const active = nativeSerialPorts.get(String(pathName).toUpperCase())?.port;
+    if (!active?.isOpen) throw new Error(`${pathName} is not open.`);
+    const bytes = Buffer.from(data);
+    await new Promise((resolve, reject) => active.write(bytes, (error) => {
+      if (error) return reject(error);
+      active.drain((drainError) => drainError ? reject(drainError) : resolve());
+    }));
+  });
+  ipcMain.handle('signal-outpost:serial-close', async (event, pathName) => {
+    if (!trusted(event)) throw new Error('Serial access is limited to Signal Outpost CPS.');
+    const key = String(pathName).toUpperCase();
+    const active = nativeSerialPorts.get(key)?.port;
+    if (!active) return;
+    await new Promise((resolve, reject) => active.close((error) => error ? reject(error) : resolve()));
+    nativeSerialPorts.delete(key);
+  });
+}
+
 function setApplicationMenu(window) {
   const template = [
     {
@@ -345,6 +419,7 @@ async function createWindow() {
       ? path.join(process.resourcesPath, 'icon.ico')
       : path.join(__dirname, '..', 'build', 'icon.ico'),
     webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
@@ -369,6 +444,7 @@ async function createWindow() {
 }
 
 app.whenReady().then(async () => {
+  setupNativeSerialAccess();
   setupUpdater();
   await createWindow();
   app.on('activate', () => {
@@ -377,6 +453,10 @@ app.whenReady().then(async () => {
 });
 
 app.on('before-quit', () => {
+  for (const { port } of nativeSerialPorts.values()) {
+    if (port.isOpen) port.close(() => {});
+  }
+  nativeSerialPorts.clear();
   if (localServer) localServer.close();
 });
 

@@ -1,5 +1,13 @@
 # Release notes
 
+## v1.0.5 — Native Windows COM port selection
+
+### Changed
+
+- Replaced the browser device picker in the desktop CPS with a Windows COM port list, including device names and USB adapter details when available.
+- Added a native serial transport for the selected COM port so codeplug reads/writes and firmware flashing use the same selected device.
+- The chooser preselects COM4 when it is present and lets the user refresh the Windows port list.
+
 ## v1.0.4 — Improve COM port discovery
 
 ### Fixed

@@ -506,6 +506,8 @@ async function connectSerial() {
 // (no prompt). Throws until it is back.
 async function reopenRFoundryPort() {
 	if (S.fakeRadio) return S.fakeRadio.serialStream();
+	const preferred = preferredRadioPort([RFOUNDRY_USB, ...c7ui.CABLES]);
+	if (preferred?.__signalOutpostNativeSerial === true) return SerialStream.open(preferred);
 	const ports = await grantedRFoundryPorts();
 	if (!ports.length) throw new Error("not back yet");
 	return SerialStream.open(ports[ports.length - 1]);
@@ -2502,7 +2504,8 @@ function stubPanel(fallback, onDone, what, stockPicked = () => {}) {
 	const repick = () => {
 		const pick = button(t("flash.f4.repick_button"), async () => {
 			try {
-				stub.s = await SerialStream.request();
+				const preferred = preferredRadioPort([RFOUNDRY_USB, ...c7ui.CABLES]);
+				stub.s = preferred ? await SerialStream.open(preferred) : await SerialStream.request();
 				await stub.helloWithin(2000, t("flash.c7.write.lost"));
 				stub.attached();
 				status.replaceChildren();
