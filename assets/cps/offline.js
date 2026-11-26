@@ -27,22 +27,35 @@ window.addEventListener("signal-outpost:serial-port-selected", (event) => {
 });
 
 document.getElementById("serial-port-choice")?.addEventListener("click", async () => {
+	const button = document.getElementById("serial-port-choice");
 	const serial = navigator.serial;
 	if (!serial) {
 		if (serialStatus) serialStatus.textContent = "Web Serial is unavailable in this app build";
 		return;
 	}
+	if (button) {
+		button.disabled = true;
+		button.textContent = "Choose a port…";
+	}
+	if (serialStatus) serialStatus.textContent = "Opening the serial port chooser…";
 	try {
-		// These cover the DM-32UV USB radio and common FTDI, CH340, CP210x and PL2303 programming cables.
-		const filters = [
-			{ usbVendorId: 0x1FC9, usbProductId: 0x0094 },
-			...([0x0403, 0x1A86, 0x10C4, 0x067B].map((usbVendorId) => ({ usbVendorId }))),
-		];
-		const port = await serial.requestPort({ filters });
+		// Leave filters empty so unusual USB-serial cable IDs still appear in the system chooser.
+		const port = await serial.requestPort();
 		window.__signalOutpostPreferredSerialPort = port;
+		window.__signalOutpostSerialLabel = "Selected serial port";
 		showSerialPort(port);
 	} catch (error) {
-		if (error?.name !== "NotFoundError" && serialStatus) serialStatus.textContent = `Port selection failed: ${error?.message || error}`;
+		if (serialStatus) {
+			serialStatus.classList.remove("selected");
+			serialStatus.textContent = error?.name === "NotFoundError"
+				? "No port selected. Connect the radio cable and try again."
+				: `Port selection failed: ${error?.message || error}`;
+		}
+	} finally {
+		if (button) {
+			button.disabled = false;
+			button.textContent = "Choose COM port";
+		}
 	}
 });
 

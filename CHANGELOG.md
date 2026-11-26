@@ -1,5 +1,12 @@
 # Release notes
 
+## v1.0.3 — Fix COM port chooser
+
+### Fixed
+
+- The COM port chooser now includes serial devices regardless of USB vendor ID, so less common programming cables are not hidden by a filter.
+- The CPS shows an opening state and a visible message when the chooser is canceled or no port is selected.
+
 ## v1.0.2 — Local firmware installer and COM port selection
 
 ### Added
