@@ -1,5 +1,12 @@
 # Release notes
 
+## v1.0.4 — Improve COM port discovery
+
+### Fixed
+
+- Disabled Chromium's default Web Serial device blocklist in the desktop CPS so compatible USB-to-serial adapters such as COM3 can appear in the chooser.
+- Added an explicit message when Windows exposes no serial ports to the CPS.
+
 ## v1.0.3 — Fix COM port chooser
 
 ### Fixed

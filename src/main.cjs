@@ -8,6 +8,11 @@ const APP_ID = 'org.signaloutpost.cps';
 const HOST = '127.0.0.1';
 const PORT = 8776;
 const APP_ORIGIN = `http://${HOST}:${PORT}`;
+
+// Programming cables can use USB-serial chipsets on Chromium's default Web Serial blocklist.
+// The CPS validates the selected device before opening it, so make those COM ports selectable.
+app.commandLine.appendSwitch('disable-serial-blocklist');
+
 const MIME_TYPES = new Map([
   ['.css', 'text/css; charset=utf-8'],
   ['.gif', 'image/gif'],
@@ -138,6 +143,18 @@ function setupSerialAccess(window) {
     event.preventDefault();
     if (!isTrustedAppPage(contents)) {
       callback('');
+      return;
+    }
+
+    if (!ports.length) {
+      dialog.showMessageBox(window, {
+        type: 'warning',
+        title: 'No serial ports detected',
+        message: 'Signal Outpost CPS did not receive any COM ports from Windows.',
+        detail: 'If Device Manager shows COM3, reconnect the cable and restart the CPS. Close any other program currently using the port.',
+        buttons: ['OK'],
+        noLink: true,
+      }).then(() => callback(''), () => callback(''));
       return;
     }
 

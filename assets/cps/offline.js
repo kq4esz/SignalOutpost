@@ -48,7 +48,7 @@ document.getElementById("serial-port-choice")?.addEventListener("click", async (
 		if (serialStatus) {
 			serialStatus.classList.remove("selected");
 			serialStatus.textContent = error?.name === "NotFoundError"
-				? "No port selected. Connect the radio cable and try again."
+				? "No port selected. If COM3 is available, reconnect the cable and restart CPS."
 				: `Port selection failed: ${error?.message || error}`;
 		}
 	} finally {
