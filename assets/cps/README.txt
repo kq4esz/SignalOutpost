@@ -1,7 +1,7 @@
 Signal Outpost CPS — offline DM-32UV codeplug programmer
 
 START
-1. Install Signal-Outpost-CPS-1.0.5-x64-Setup.exe and open Signal Outpost CPS from the Start menu.
+1. Install Signal-Outpost-CPS-1.0.6-x64-Setup.exe and open Signal Outpost CPS from the Start menu.
 2. Use Choose COM port to select the programming cable from the Windows COM port list. The desktop app can list ports such as COM4 even when Chromium's device picker omits the adapter.
 3. Use Read from Radio or Write to Radio for codeplug work, or choose Firmware to install a local DM-32UV image.
 

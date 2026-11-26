@@ -1,5 +1,12 @@
 # Release notes
 
+## v1.0.6 — Complete GitHub release publishing
+
+### Fixed
+
+- The release workflow now creates or reuses one release and publishes the CPS installer, updater manifest, block map, firmware image, manifest, checksums, and release notes together.
+- Added a manual workflow option to rebuild and republish a matching version tag.
+
 ## v1.0.5 — Native Windows COM port selection
 
 ### Changed
